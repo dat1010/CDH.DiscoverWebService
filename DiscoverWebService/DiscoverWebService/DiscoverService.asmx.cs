@@ -7,6 +7,23 @@ using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Client;
 using Microsoft.Xrm.Client.Services;
 using Microsoft.Xrm.Sdk;
+using System;
+using System.ServiceModel;
+using System.ServiceModel.Description;
+
+// These namespaces are found in the Microsoft.Xrm.Sdk.dll assembly
+// located in the SDK\bin folder of the SDK download.
+using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Query;
+using Microsoft.Xrm.Sdk.Client;
+using Microsoft.Xrm.Sdk.Messages;
+
+
+// This namespace is found in Microsoft.Crm.Sdk.Proxy.dll assembly
+// found in the SDK\bin folder.
+using Microsoft.Crm.Sdk.Messages;
+
+using System.Linq;  
 
 
 namespace DiscoverWebService
@@ -18,20 +35,54 @@ namespace DiscoverWebService
 
     public class DiscoverService : System.Web.Services.WebService
     {
-
-        private IOrganizationService Connect()
+        private OrganizationServiceProxy _serviceProxy;
+        private bool IsLoggedIn { get; set; }
+        [WebMethod]
+        public bool Connect(string url, string userName, string password)
         {
-            CrmConnection con = new CrmConnection("CRM");
-            IOrganizationService service = new OrganizationService(con);
-            return service;
+            OrganizationService service;
+            //"Url=https://CDH62CommercialwithCRM.crm.dynamics.com; Username=alans@CDH62CommercialwithCRM.onmicrosoft.com; Password=Vulo5319;"
+            try
+            {
+                string connection = string.Format("Url={0}; Username={1}; Password={2};", url, userName, password);
+                CrmConnection crmConnection = CrmConnection.Parse(connection);
+                service = new OrganizationService(crmConnection);
+                IsLoggedIn = true;
+                return true;
+                
+            }catch
+            {
+                IsLoggedIn = false;
+            }
+            return false;
+
+            
         }
         [WebMethod]
-        public string HelloWorld()
+        public string GetContactsByName(string accountName)
         {
-            var response = Connect();
-            response.Execute(new WhoAmIRequest());
-            return "Hello Discover";
-            //return response.ToString;
+            //var response = Connect();
+            
+
+            //XrmServiceContext context = new XrmServiceContext(service);
+
+            //var allisonBrown = new Xrm.Contact
+            //{
+            //    FirstName = "Allison",
+            //    LastName = "Brown",
+            //    Address1_Line1 = "23 Market St.",
+            //    Address1_City = "Sammamish",
+            //    Address1_StateOrProvince = "MT",
+            //    Address1_PostalCode = "99999",
+            //    Telephone1 = "12345678",
+            //    EMailAddress1 = "allison.brown@example.com"
+            //};
+
+            //context.AddObject(allisonBrown);
+            //context.SaveChanges();
+            //Entity account = new Entity("account");
+            
+            return "test";
         }
     }
 }
