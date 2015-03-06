@@ -17,6 +17,8 @@ using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Messages;
+using Microsoft.Xrm.Client.Services;
+
 
 
 // This namespace is found in Microsoft.Crm.Sdk.Proxy.dll assembly
@@ -61,28 +63,44 @@ namespace DiscoverWebService
         [WebMethod]
         public string GetContactsByName(string accountName)
         {
-            //var response = Connect();
-            
+            CrmConnection srm = new CrmConnection("CRM");
+            using (ServiceContext svcContext = new ServiceContext(_serviceProxy))
+            {
 
-            //XrmServiceContext context = new XrmServiceContext(service);
+                var query_where3 = from c in svcContext.ContactSet
+                                   join a in svcContext.AccountSet
+                                   on c.ContactId equals a.PrimaryContactId.Id
+                                   where a.Name.Contains(accountName)
 
-            //var allisonBrown = new Xrm.Contact
-            //{
-            //    FirstName = "Allison",
-            //    LastName = "Brown",
-            //    Address1_Line1 = "23 Market St.",
-            //    Address1_City = "Sammamish",
-            //    Address1_StateOrProvince = "MT",
-            //    Address1_PostalCode = "99999",
-            //    Telephone1 = "12345678",
-            //    EMailAddress1 = "allison.brown@example.com"
-            //};
+                                   select new
+                                   {
+                                       account_name = a.Name,
+                                       contact_name = c.LastName
+                                   };
 
-            //context.AddObject(allisonBrown);
-            //context.SaveChanges();
-            //Entity account = new Entity("account");
-            
-            return "test";
+                foreach (var c in query_where3)
+                {
+                    System.Console.WriteLine("acct: " +
+                     c.account_name +
+                     "\t\t\t" +
+                     "contact: " +
+                     c.contact_name);
+                }
+            }
+
+            if (IsLoggedIn)
+            {
+                QualifyLeadRequest rs = new QualifyLeadRequest();
+
+
+            }
+            else
+            {
+                return "Please log in";
+            }
+
+
+            return accountName;
         }
     }
 }
