@@ -42,16 +42,17 @@ namespace DiscoverWebService
         [WebMethod]
         public bool Connect(string url, string userName, string password)
         {
-            OrganizationService service;
+            
             //"Url=https://CDH62CommercialwithCRM.crm.dynamics.com; Username=alans@CDH62CommercialwithCRM.onmicrosoft.com; Password=Vulo5319;"
             try
             {
                 string connection = string.Format("Url={0}; Username={1}; Password={2};", url, userName, password);
-                CrmConnection crmConnection = CrmConnection.Parse(connection);
-                service = new OrganizationService(crmConnection);
+                CrmConnection crmConnection = CrmConnection.Parse(connection);                         
+                Microsoft.Xrm.Sdk.IOrganizationService service = new OrganizationService(crmConnection);
+                var response = service.Execute(new WhoAmIRequest());                
                 IsLoggedIn = true;
                 return true;
-                
+            
             }catch
             {
                 IsLoggedIn = false;
@@ -61,46 +62,18 @@ namespace DiscoverWebService
             
         }
         [WebMethod]
-        public string GetContactsByName(string accountName)
+        public EntityCollection GetContacts()
         {
-            CrmConnection srm = new CrmConnection("CRM");
-            using (ServiceContext svcContext = new ServiceContext(_serviceProxy))
-            {
 
-                var query_where3 = from c in svcContext.ContactSet
-                                   join a in svcContext.AccountSet
-                                   on c.ContactId equals a.PrimaryContactId.Id
-                                   where a.Name.Contains(accountName)
+            CrmConnection con = new CrmConnection("CRM");
+            IOrganizationService service = new OrganizationService(con);
+            //Might need to call login fucntion first
 
-                                   select new
-                                   {
-                                       account_name = a.Name,
-                                       contact_name = c.LastName
-                                   };
+        	QueryExpression query = new QueryExpression("contact");
+            query.ColumnSet = new ColumnSet(true);
 
-                foreach (var c in query_where3)
-                {
-                    System.Console.WriteLine("acct: " +
-                     c.account_name +
-                     "\t\t\t" +
-                     "contact: " +
-                     c.contact_name);
-                }
-            }
-
-            if (IsLoggedIn)
-            {
-                QualifyLeadRequest rs = new QualifyLeadRequest();
-
-
-            }
-            else
-            {
-                return "Please log in";
-            }
-
-
-            return accountName;
+            EntityCollection result = service.RetrieveMultiple(query);
+            return result;
         }
     }
 }
