@@ -17,6 +17,8 @@ using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Messages;
+using Microsoft.Xrm.Client.Services;
+
 
 
 // This namespace is found in Microsoft.Crm.Sdk.Proxy.dll assembly
@@ -40,16 +42,17 @@ namespace DiscoverWebService
         [WebMethod]
         public bool Connect(string url, string userName, string password)
         {
-            OrganizationService service;
+            
             //"Url=https://CDH62CommercialwithCRM.crm.dynamics.com; Username=alans@CDH62CommercialwithCRM.onmicrosoft.com; Password=Vulo5319;"
             try
             {
                 string connection = string.Format("Url={0}; Username={1}; Password={2};", url, userName, password);
-                CrmConnection crmConnection = CrmConnection.Parse(connection);
-                service = new OrganizationService(crmConnection);
+                CrmConnection crmConnection = CrmConnection.Parse(connection);                         
+                Microsoft.Xrm.Sdk.IOrganizationService service = new OrganizationService(crmConnection);
+                var response = service.Execute(new WhoAmIRequest());                
                 IsLoggedIn = true;
                 return true;
-                
+            
             }catch
             {
                 IsLoggedIn = false;
@@ -59,30 +62,18 @@ namespace DiscoverWebService
             
         }
         [WebMethod]
-        public string GetContactsByName(string accountName)
+        public EntityCollection GetContacts()
         {
-            //var response = Connect();
-            
 
-            //XrmServiceContext context = new XrmServiceContext(service);
+            CrmConnection con = new CrmConnection("CRM");
+            IOrganizationService service = new OrganizationService(con);
+            //Might need to call login fucntion first
 
-            //var allisonBrown = new Xrm.Contact
-            //{
-            //    FirstName = "Allison",
-            //    LastName = "Brown",
-            //    Address1_Line1 = "23 Market St.",
-            //    Address1_City = "Sammamish",
-            //    Address1_StateOrProvince = "MT",
-            //    Address1_PostalCode = "99999",
-            //    Telephone1 = "12345678",
-            //    EMailAddress1 = "allison.brown@example.com"
-            //};
+        	QueryExpression query = new QueryExpression("contact");
+            query.ColumnSet = new ColumnSet(true);
 
-            //context.AddObject(allisonBrown);
-            //context.SaveChanges();
-            //Entity account = new Entity("account");
-            
-            return "test";
+            EntityCollection result = service.RetrieveMultiple(query);
+            return result;
         }
     }
 }
