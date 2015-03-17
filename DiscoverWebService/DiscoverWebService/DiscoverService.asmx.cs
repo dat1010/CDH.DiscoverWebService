@@ -25,7 +25,12 @@ using Microsoft.Xrm.Client.Services;
 // found in the SDK\bin folder.
 using Microsoft.Crm.Sdk.Messages;
 
-using System.Linq;  
+using System.Linq;
+using System.Xml.Serialization;
+using System.Collections;
+using System.IO;
+using System.Text;
+using System.Xml.Linq;  
 
 
 namespace DiscoverWebService
@@ -62,18 +67,32 @@ namespace DiscoverWebService
             
         }
         [WebMethod]
-        public EntityCollection GetContacts()
+        public string GetContacts()
         {
 
             CrmConnection con = new CrmConnection("CRM");
             IOrganizationService service = new OrganizationService(con);
             //Might need to call login fucntion first
 
-        	QueryExpression query = new QueryExpression("contact");
-            query.ColumnSet = new ColumnSet(true);
+            QueryExpression query = new QueryExpression("contact");
+            query.ColumnSet = new ColumnSet(new string[] {"contactid","firstname","lastname"});
+
 
             EntityCollection result = service.RetrieveMultiple(query);
-            return result;
+
+            XmlSerializer serializer = new XmlSerializer(typeof(EntityCollection));
+            StringBuilder stringBuilder = new StringBuilder();
+
+            XElement xmlElements;
+            foreach(Entity test in result.Entities)
+            {
+                xmlElements = new XElement("Contact", test.Attributes.Select(i => new XElement("branch", i)));
+                stringBuilder.Append(xmlElements.ToString());
+               
+
+            }
+
+            return stringBuilder.ToString();
         }
     }
 }
