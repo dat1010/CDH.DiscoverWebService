@@ -75,7 +75,7 @@ namespace DiscoverWebService
             //Might need to call login fucntion first
 
             QueryExpression query = new QueryExpression("contact");
-            query.ColumnSet = new ColumnSet(new string[] {"contactid","firstname","lastname"});
+            query.ColumnSet = new ColumnSet(new string[] { "contactid", "firstname", "lastname", "emailaddress1", "address1_line1", "address1_stateorprovince", "address1_postalcode" });
 
 
             EntityCollection result = service.RetrieveMultiple(query);
