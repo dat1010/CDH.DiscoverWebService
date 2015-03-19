@@ -42,7 +42,6 @@ namespace DiscoverWebService
 
     public class DiscoverService : System.Web.Services.WebService
     {
-        private OrganizationServiceProxy _serviceProxy;
         private bool IsLoggedIn { get; set; }
         [WebMethod]
         public bool Connect(string url, string userName, string password)
@@ -86,13 +85,43 @@ namespace DiscoverWebService
             XElement xmlElements;
             foreach(Entity test in result.Entities)
             {
-                xmlElements = new XElement("Contact", test.Attributes.Select(i => new XElement("branch", i)));
-                stringBuilder.Append(xmlElements.ToString());
-               
+                xmlElements = new XElement("Contact", test.Attributes.Select(i => new XElement(i.Key.ToString(), i)));
+                stringBuilder.Append(xmlElements.ToString());               
 
             }
 
             return stringBuilder.ToString();
+        }
+
+        [WebMethod]
+        public string UpdateContacts(string xml)
+        {
+            CrmConnection con = new CrmConnection("CRM");
+            IOrganizationService service = new OrganizationService(con);
+
+            string testXML = "<Contact> <contactid>[contactid, 47a0e5b9-88df-e311-b8e5-6c3be5a8b200]</contactid> <firstname>[firstname, Vincent]</firstname> <lastname>[lastname, Lauriant]</lastname> <emailaddress1>[emailaddress1, vlauriant@adatum.com]</emailaddress1> </Contact><Contact> <contactid>[contactid, 49a0e5b9-88df-e311-b8e5-6c3be5a8b200]</contactid> <firstname>[firstname, Adrian]</firstname> <lastname>[lastname, Dumitrascu]</lastname> <emailaddress1>[emailaddress1, Adrian@adventure-works.com]</emailaddress1> <address1_line1>[address1_line1, 249 Alexander Pl.]</address1_line1> <address1_stateorprovince>[address1_stateorprovince, WA]</address1_stateorprovince> <address1_postalcode>[address1_postalcode, 86372]</address1_postalcode> <address1_composite>[address1_composite, 249 Alexander Pl. WA 86372]</address1_composite> </Contact>";
+            XmlSerializer serializer = new XmlSerializer(typeof(string));
+            Entity account = new Entity("account");
+
+            /*******************************************************************
+             * We need to parse this XML then create an entity with the name and order id
+             * Then we need up update the new propery values and save the contact.
+             *******************************************************************/
+
+            // Create a column set to define which attributes should be retrieved.
+            ColumnSet attributes = new ColumnSet(new string[] { "name", "ownerid" });
+           
+            // Retrieve the account and its name and ownerid attributes.
+            account = service.Retrieve(account.LogicalName, new Guid("47a0e5b9-88df-e311-b8e5-6c3be5a8b200"), attributes);
+
+            // Update the postal code attribute.
+            // account["address1_postalcode"] = "98052";
+
+            // Update the account.
+            service.Update(account);
+
+            return "Success";
+            
         }
     }
 }
