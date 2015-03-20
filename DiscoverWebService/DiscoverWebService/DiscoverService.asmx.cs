@@ -7,30 +7,14 @@ using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Client;
 using Microsoft.Xrm.Client.Services;
 using Microsoft.Xrm.Sdk;
-using System;
-using System.ServiceModel;
 using System.ServiceModel.Description;
-
-// These namespaces are found in the Microsoft.Xrm.Sdk.dll assembly
-// located in the SDK\bin folder of the SDK download.
-using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Messages;
-using Microsoft.Xrm.Client.Services;
-
-
-
-// This namespace is found in Microsoft.Crm.Sdk.Proxy.dll assembly
-// found in the SDK\bin folder.
-using Microsoft.Crm.Sdk.Messages;
-
-using System.Linq;
 using System.Xml.Serialization;
 using System.Collections;
-using System.IO;
 using System.Text;
-using System.Xml.Linq;  
+using System.Xml.Linq;
 
 
 namespace DiscoverWebService
@@ -42,55 +26,73 @@ namespace DiscoverWebService
 
     public class DiscoverService : System.Web.Services.WebService
     {
-        private bool IsLoggedIn { get; set; }
+
+        private IOrganizationService Service
+        {
+            get
+            {
+                string key = "Cached_Service_Key";
+                if (System.Web.HttpContext.Current.Cache.Get(key) == null)
+                {
+                    return null;
+                }
+                return (IOrganizationService)System.Web.HttpContext.Current.Cache.Get(key);
+            }
+            set
+            {
+                if(value != null)
+                {
+                    string key = "Cached_Service_Key";
+                    System.Web.HttpContext.Current.Cache.Insert(key, value);
+                }          
+            }
+        }
         [WebMethod]
         public bool Connect(string url, string userName, string password)
-        {
-            
+        
+        {           
             //"Url=https://CDH62CommercialwithCRM.crm.dynamics.com; Username=alans@CDH62CommercialwithCRM.onmicrosoft.com; Password=Vulo5319;"
             try
             {
                 string connection = string.Format("Url={0}; Username={1}; Password={2};", url, userName, password);
-                CrmConnection crmConnection = CrmConnection.Parse(connection);                         
-                Microsoft.Xrm.Sdk.IOrganizationService service = new OrganizationService(crmConnection);
-                var response = service.Execute(new WhoAmIRequest());                
-                IsLoggedIn = true;
-                return true;
-            
+                CrmConnection crmConnection = CrmConnection.Parse(connection);
+                Microsoft.Xrm.Sdk.IOrganizationService conectionService = new OrganizationService(crmConnection);
+                if (conectionService != null)
+                {
+                    conectionService.Execute(new WhoAmIRequest());
+                    Service = conectionService;
+                    return true;
+                }                          
             }catch
             {
-                IsLoggedIn = false;
+                return false;
             }
             return false;
-
             
         }
         [WebMethod]
         public string GetContacts()
-        {
-
-            CrmConnection con = new CrmConnection("CRM");
-            IOrganizationService service = new OrganizationService(con);
-            //Might need to call login fucntion first
-
+        {           
             QueryExpression query = new QueryExpression("contact");
             query.ColumnSet = new ColumnSet(new string[] { "contactid", "firstname", "lastname", "emailaddress1", "address1_line1", "address1_stateorprovince", "address1_postalcode" });
-
-
-            EntityCollection result = service.RetrieveMultiple(query);
-
-            XmlSerializer serializer = new XmlSerializer(typeof(EntityCollection));
-            StringBuilder stringBuilder = new StringBuilder();
-
-            XElement xmlElements;
-            foreach(Entity test in result.Entities)
+            if(Service != null)
             {
-                xmlElements = new XElement("Contact", test.Attributes.Select(i => new XElement(i.Key.ToString(), i)));
-                stringBuilder.Append(xmlElements.ToString());               
+                EntityCollection result = Service.RetrieveMultiple(query);
+                XmlSerializer serializer = new XmlSerializer(typeof(EntityCollection));
+                StringBuilder stringBuilder = new StringBuilder();
 
+                XElement xmlElements;
+                foreach (Entity test in result.Entities)
+                {
+                    xmlElements = new XElement("Contact", test.Attributes.Select(i => new XElement(i.Key.ToString(), i)));
+                    stringBuilder.Append(xmlElements.ToString());
+                }
+                return stringBuilder.ToString();
             }
-
-            return stringBuilder.ToString();
+            else
+            {
+                return "You must log in.";
+            }            
         }
 
         [WebMethod]
@@ -122,6 +124,34 @@ namespace DiscoverWebService
 
             return "Success";
             
+        }
+
+        [WebMethod( Description = "Does not use cached service, use for testing only, Gets All contacts.")]
+        public string ConnectionTestIpad()
+        {
+
+            //Might need to call login fucntion first
+            CrmConnection con = new CrmConnection("CRM");
+            IOrganizationService service = new OrganizationService(con);
+
+
+            QueryExpression query = new QueryExpression("contact");
+            query.ColumnSet = new ColumnSet(new string[] { "contactid", "firstname", "lastname", "emailaddress1", "address1_line1", "address1_stateorprovince", "address1_postalcode" });
+
+            EntityCollection result = service.RetrieveMultiple(query);
+
+            XmlSerializer serializer = new XmlSerializer(typeof(EntityCollection));
+            StringBuilder stringBuilder = new StringBuilder();
+
+            XElement xmlElements;
+            foreach (Entity test in result.Entities)
+            {
+                xmlElements = new XElement("Contact", test.Attributes.Select(i => new XElement(i.Key.ToString(), i)));
+                stringBuilder.Append(xmlElements.ToString());
+
+            }
+
+            return stringBuilder.ToString();
         }
     }
 }
