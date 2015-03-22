@@ -1,0 +1,12 @@
+﻿<Properties StartupItem="DiscoverWebService/DiscoverWebService.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="DiscoverWebService/DiscoverService.asmx.cs">
+    <Files>
+      <File FileName="DiscoverWebService/DiscoverService.asmx.cs" Line="175" Column="4" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
