@@ -17,7 +17,7 @@ namespace DiscoveryServiceWebAPI.Controllers
 {
     public class TestContactController : ApiController
     {
-        public string Get()
+        public EntityCollection Get()
         {
 
             //Might need to call login fucntion first
@@ -38,11 +38,67 @@ namespace DiscoveryServiceWebAPI.Controllers
             {
                 xmlElements = new XElement("Contact", test.Attributes.Select(i => new XElement(i.Key.ToString(), i.Value.ToString())));
                 stringBuilder.Append(xmlElements.ToString());
-                stringBuilder.Append("\n\n");
 
             }
+            
+            return result;
+        }
+        public string Put(EntityCollection accounts)
+        {
+            //return "woo";
+            CrmConnection con = new CrmConnection("CRM");
+            IOrganizationService service = new OrganizationService(con);
 
-            return stringBuilder.ToString();
+
+
+            string testXML = "<Contact> <contactid>49a0e5b9-88df-e311-b8e5-6c3be5a8b200</contactid> <firstname>Adrian</firstname> <lastname>Dumitrascu</lastname> <emailaddress1>Adrian@adventure-works.com</emailaddress1> <address1_line1>249 Alexander Pl.</address1_line1> <address1_stateorprovince>WA</address1_stateorprovince> <address1_postalcode>86372</address1_postalcode> <address1_composite>249 Alexander Pl. WA 86372</address1_composite> </Contact>";
+            XmlSerializer serializer = new XmlSerializer(typeof(string));
+            //EntityCollection accounts = new EntityCollection();
+
+
+            /*******************************************************************
+             * We need to parse this XML then create an entity with the name and order id
+             * Then we need up update the new propery values and save the contact.
+             *******************************************************************/
+            int position = testXML.IndexOf("<", 0) + 1;
+            int valueStart;
+            int endPosition;
+            string key;
+            string value;
+            Entity account = new Entity();
+
+            /*
+            while (position != 0)
+            {
+
+                valueStart = testXML.IndexOf(">", position) + 1;
+                endPosition = testXML.IndexOf("<", position);
+                key = testXML.Substring(position, valueStart - position);
+                value = testXML.Substring(valueStart, endPosition - (valueStart));
+                if (key != "Contact")
+                {
+                    if (key == "contactID")
+                    {
+                        account = new Entity();
+                        account.Id = new Guid(value);
+                        account.LogicalName = "contact";
+                        accounts.Entities.Add(account);
+                    }
+                    account.Attributes.Add(new KeyValuePair<String, Object>(key, value));
+
+                }
+
+                position = testXML.IndexOf("<", endPosition) + 1;
+            }
+             */
+            foreach (Entity acc in accounts.Entities)
+            {
+                service.Update(acc);
+            }
+            
+
+            return "Success";
+
         }
     }
 }
