@@ -30,11 +30,16 @@ namespace DiscoveryServiceWebAPI.Controllers
             query.ColumnSet = new ColumnSet(new string[] { "contactid", "firstname", "lastname", "emailaddress1", "address1_line1", "address1_stateorprovince", "address1_postalcode" });
             
             EntityCollection result = serviceTest.RetrieveMultiple(query);
-            
+
+
             return result;
         }
-        public Boolean Put(EntityCollection accounts)
+        public String Put(EntityCollection accounts)
         {
+            if (accounts == null)
+            {
+                return "Error creating accounts from XML";
+            }
             CrmConnection con = new CrmConnection("CRM");
             IOrganizationService service = new OrganizationService(con);
 
@@ -58,7 +63,11 @@ namespace DiscoveryServiceWebAPI.Controllers
 
             ExecuteMultipleResponse responseWithResults = (ExecuteMultipleResponse)service.Execute(requestWithResults);
 
-            return !responseWithResults.IsFaulted;
+            if (responseWithResults.IsFaulted)
+            {
+                return "Errors during upload";
+            }
+            return "Success!";
         }
     }
 }

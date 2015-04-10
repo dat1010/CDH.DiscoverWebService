@@ -13,6 +13,7 @@ using Microsoft.Xrm.Client.Services;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Crm.Sdk.Messages;
+using Microsoft.Xrm.Sdk.Messages;
 
 namespace DiscoveryServiceWebAPI.Controllers
 {
@@ -63,87 +64,64 @@ namespace DiscoveryServiceWebAPI.Controllers
 
         }
 
-        public EntityCollection Get(string guid, [FromBody] string xml)
+        public EntityCollection Get()
         {
+
+            //Might need to call login fucntion first
+            //CrmConnection con = new CrmConnection("CRM");
+            //IOrganizationService serviceTest = new OrganizationService(con);
+
+
             QueryExpression query = new QueryExpression("contact");
             query.ColumnSet = new ColumnSet(new string[] { "contactid", "firstname", "lastname", "emailaddress1", "address1_line1", "address1_stateorprovince", "address1_postalcode" });
-            if (Service != null)
-            {
-                EntityCollection result = Service.RetrieveMultiple(query);
-                XmlSerializer serializer = new XmlSerializer(typeof(EntityCollection));
-                StringBuilder stringBuilder = new StringBuilder();
 
-                XElement xmlElements;
-                foreach (Entity test in result.Entities)
-                {
-                    xmlElements = new XElement("Contact", test.Attributes.Select(i => new XElement(i.Key.ToString(), i)));
-                    stringBuilder.Append(xmlElements.ToString());
-                    stringBuilder.Append("\n\n");
-                }
-                return result;
-            }
-            else
-            {
-                return null;
-            }
+            EntityCollection result = Service.RetrieveMultiple(query);
+
+
+            return result;
         }
-
-        public string Put(int id, [FromBody]string xml)
+        public String Put(EntityCollection accounts)
         {
-            CrmConnection con = new CrmConnection("CRM");
-            IOrganizationService service = new OrganizationService(con);
-
-            string testXML = "<Contact> <contactid>[contactid, 47a0e5b9-88df-e311-b8e5-6c3be5a8b200]</contactid> <firstname>[firstname, Vincent]</firstname> <lastname>[lastname, Lauriant]</lastname> <emailaddress1>[emailaddress1, vlauriant@adatum.com]</emailaddress1> </Contact><Contact> <contactid>[contactid, 49a0e5b9-88df-e311-b8e5-6c3be5a8b200]</contactid> <firstname>[firstname, Adrian]</firstname> <lastname>[lastname, Dumitrascu]</lastname> <emailaddress1>[emailaddress1, Adrian@adventure-works.com]</emailaddress1> <address1_line1>[address1_line1, 249 Alexander Pl.]</address1_line1> <address1_stateorprovince>[address1_stateorprovince, WA]</address1_stateorprovince> <address1_postalcode>[address1_postalcode, 86372]</address1_postalcode> <address1_composite>[address1_composite, 249 Alexander Pl. WA 86372]</address1_composite> </Contact>";
-            XmlSerializer serializer = new XmlSerializer(typeof(string));
-            EntityCollection accounts = new EntityCollection();
-
-
-            /*******************************************************************
-             * We need to parse this XML then create an entity with the name and order id
-             * Then we need up update the new propery values and save the contact.
-             *******************************************************************/
-            int position = testXML.IndexOf("[", 0) + 1;
-            int valueStart;
-            int endPosition;
-            string key;
-            string value;
-            Entity account = new Entity();
-
-
-            while (position != 0)
+            if (accounts == null)
             {
-
-                valueStart = testXML.IndexOf(",", position) + 2;
-                endPosition = testXML.IndexOf("]", position);
-                key = testXML.Substring(position, valueStart - position - 2);
-                value = testXML.Substring(valueStart, endPosition - (valueStart));
-                if (key == "contactid")
-                {
-                    account = new Entity();
-                    account.Id = new Guid(value);
-                    account.LogicalName = "contact";
-                    accounts.Entities.Add(account);
-
-                }
-                account.Attributes.Add(new KeyValuePair<String, Object>(key, value));
-
-                position = testXML.IndexOf("[", endPosition) + 1;
+                return "Error creating accounts from XML";
             }
+            //CrmConnection con = new CrmConnection("CRM");
+            //IOrganizationService service = new OrganizationService(con);
+
+            ExecuteMultipleRequest requestWithResults = new ExecuteMultipleRequest()
+            {
+                // Assign settings that define execution behavior: continue on error, return responses. 
+                Settings = new ExecuteMultipleSettings()
+                {
+                    ContinueOnError = false,
+                    ReturnResponses = false
+                },
+                // Create an empty organization request collection.
+                Requests = new OrganizationRequestCollection()
+            };
+
             foreach (Entity acc in accounts.Entities)
             {
-                service.Update(acc);
+                UpdateRequest updateRequest = new UpdateRequest { Target = acc };
+                requestWithResults.Requests.Add(updateRequest);
             }
 
-            return "Success";
+            ExecuteMultipleResponse responseWithResults = (ExecuteMultipleResponse)Service.Execute(requestWithResults);
 
+            if (responseWithResults.IsFaulted)
+            {
+                return "Errors during upload";
+            }
+            return "Success!";
         }
 
-        
+
     }
     public class CreateUserLogIn
     {
         public string url { get; set; }
-        public  string name { get; set; }
+        public string name { get; set; }
         public string password { get; set; }
     }
 }
