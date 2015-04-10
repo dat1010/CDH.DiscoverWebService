@@ -64,13 +64,16 @@ namespace DiscoveryServiceWebAPI.Controllers
 
         }
 
-        public EntityCollection Get()
+        public HttpResponseMessage Get()
         {
 
             //Might need to call login fucntion first
             //CrmConnection con = new CrmConnection("CRM");
             //IOrganizationService serviceTest = new OrganizationService(con);
-
+            if (Service == null)
+            {
+                return Request.CreateResponse<String>(HttpStatusCode.Forbidden, "Error!");
+            }
 
             QueryExpression query = new QueryExpression("contact");
             query.ColumnSet = new ColumnSet(new string[] { "contactid", "firstname", "lastname", "emailaddress1", "address1_line1", "address1_stateorprovince", "address1_postalcode" });
@@ -78,7 +81,7 @@ namespace DiscoveryServiceWebAPI.Controllers
             EntityCollection result = Service.RetrieveMultiple(query);
 
 
-            return result;
+            return Request.CreateResponse<EntityCollection>(HttpStatusCode.OK, result);
         }
         public String Put(EntityCollection accounts)
         {
