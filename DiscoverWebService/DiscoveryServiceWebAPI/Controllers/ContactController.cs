@@ -41,9 +41,8 @@ namespace DiscoveryServiceWebAPI.Controllers
             }
         }
 
-        public bool Post([FromBody]CreateUserLogIn login)
+        public HttpResponseMessage Post([FromBody]CreateUserLogIn login)
         {
-            //"Url=https://CDH62CommercialwithCRM.crm.dynamics.com; Username=alans@CDH62CommercialwithCRM.onmicrosoft.com; Password=Vulo5319;"
             try
             {
                 string connection = string.Format("Url={0}; Username={1}; Password={2};", login.url, login.name, login.password);
@@ -53,67 +52,86 @@ namespace DiscoveryServiceWebAPI.Controllers
                 {
                     conectionService.Execute(new WhoAmIRequest());
                     Service = conectionService;
-                    return true;
+                    return Request.CreateResponse<String>(HttpStatusCode.Forbidden, "SUCCESS");
+                }
+                else
+                {
+                    return Request.CreateResponse<String>(HttpStatusCode.InternalServerError, "ERROR: could not establish connection service");
                 }
             }
-            catch
+            catch(Exception e)
             {
-                return false;
+                return Request.CreateResponse<String>(HttpStatusCode.InternalServerError, "ERROR: Exception occured: " + e.Message);
             }
-            return false;
-
         }
 
-        public EntityCollection Get()
+        public HttpResponseMessage Get()
         {
-
-            //Might need to call login fucntion first
-            //CrmConnection con = new CrmConnection("CRM");
-            //IOrganizationService serviceTest = new OrganizationService(con);
-
-
-            QueryExpression query = new QueryExpression("contact");
-            query.ColumnSet = new ColumnSet(new string[] { "contactid", "firstname", "lastname", "emailaddress1", "address1_line1", "address1_stateorprovince", "address1_postalcode" });
-
-            EntityCollection result = Service.RetrieveMultiple(query);
-
-
-            return result;
-        }
-        public String Put(EntityCollection accounts)
-        {
-            if (accounts == null)
+            try
             {
-                return "Error creating accounts from XML";
-            }
-            //CrmConnection con = new CrmConnection("CRM");
-            //IOrganizationService service = new OrganizationService(con);
-
-            ExecuteMultipleRequest requestWithResults = new ExecuteMultipleRequest()
-            {
-                // Assign settings that define execution behavior: continue on error, return responses. 
-                Settings = new ExecuteMultipleSettings()
+                if (Service == null)
                 {
-                    ContinueOnError = false,
-                    ReturnResponses = false
-                },
-                // Create an empty organization request collection.
-                Requests = new OrganizationRequestCollection()
-            };
+                    return Request.CreateResponse<String>(HttpStatusCode.Forbidden, "ERROR: Not logged in");
+                }
 
-            foreach (Entity acc in accounts.Entities)
-            {
-                UpdateRequest updateRequest = new UpdateRequest { Target = acc };
-                requestWithResults.Requests.Add(updateRequest);
+                QueryExpression query = new QueryExpression("contact");
+                query.ColumnSet = new ColumnSet(new string[] { "contactid", "firstname", "lastname", "emailaddress1", "address1_line1", "address1_stateorprovince", "address1_postalcode" });
+
+                EntityCollection result = Service.RetrieveMultiple(query);
+                if (result.TotalRecordCountLimitExceeded)
+                {
+                    return Request.CreateResponse<String>(HttpStatusCode.InternalServerError, "ERROR: Total Record Count Limit Exceeded");
+                }
+
+
+                return Request.CreateResponse<EntityCollection>(HttpStatusCode.OK, result);
             }
-
-            ExecuteMultipleResponse responseWithResults = (ExecuteMultipleResponse)Service.Execute(requestWithResults);
-
-            if (responseWithResults.IsFaulted)
+            catch(Exception e)
             {
-                return "Errors during upload";
+                return Request.CreateResponse<String>(HttpStatusCode.InternalServerError, "ERROR: Exception occured: " + e.Message);
             }
-            return "Success!";
+        }
+        public HttpResponseMessage Put(EntityCollection accounts)
+        {
+            try
+            {
+                if (accounts == null){
+                    return Request.CreateResponse<String>(HttpStatusCode.UnsupportedMediaType, "ERROR: Cannot construct EntityCollection from given XML");
+                }
+
+                if (Service == null){
+                    return Request.CreateResponse<String>(HttpStatusCode.Forbidden, "ERROR: Not logged in");
+                }
+
+                ExecuteMultipleRequest requestWithResults = new ExecuteMultipleRequest() {
+                    // Assign settings that define execution behavior: continue on error, return responses. 
+                    Settings = new ExecuteMultipleSettings()
+                    {
+                        ContinueOnError = false,
+                        ReturnResponses = false
+                    },
+                    // Create an empty organization request collection.
+                    Requests = new OrganizationRequestCollection()
+                };
+
+                foreach (Entity acc in accounts.Entities)
+                {
+                    UpdateRequest updateRequest = new UpdateRequest { Target = acc };
+                    requestWithResults.Requests.Add(updateRequest);
+                }
+
+                ExecuteMultipleResponse responseWithResults = (ExecuteMultipleResponse)Service.Execute(requestWithResults);
+
+                if (responseWithResults.IsFaulted)
+                {
+                    return Request.CreateResponse<String>(HttpStatusCode.Forbidden, "ERROR: Fault encountered during upload");
+                }
+                return Request.CreateResponse<String>(HttpStatusCode.OK, "SUCCESS");
+            }
+            catch(Exception e)
+            {
+                return Request.CreateResponse<String>(HttpStatusCode.InternalServerError, "ERROR: Exception occured: " + e.Message);
+            }
         }
 
 
