@@ -66,13 +66,9 @@ namespace DiscoveryServiceWebAPI.Controllers
 
         public HttpResponseMessage Get()
         {
-
-            //Might need to call login fucntion first
-            //CrmConnection con = new CrmConnection("CRM");
-            //IOrganizationService serviceTest = new OrganizationService(con);
             if (Service == null)
             {
-                return Request.CreateResponse<String>(HttpStatusCode.Forbidden, "Error!");
+                return Request.CreateResponse<String>(HttpStatusCode.Forbidden, "ERROR: Not logged in");
             }
 
             QueryExpression query = new QueryExpression("contact");
@@ -83,14 +79,18 @@ namespace DiscoveryServiceWebAPI.Controllers
 
             return Request.CreateResponse<EntityCollection>(HttpStatusCode.OK, result);
         }
-        public String Put(EntityCollection accounts)
+        public HttpResponseMessage Put(EntityCollection accounts)
         {
             if (accounts == null)
             {
-                return "Error creating accounts from XML";
+                return Request.CreateResponse<String>(HttpStatusCode.UnsupportedMediaType, "ERROR: Cannot construct EntityCollection from given XML");
             }
-            //CrmConnection con = new CrmConnection("CRM");
-            //IOrganizationService service = new OrganizationService(con);
+
+            if (Service == null)
+            {
+                return Request.CreateResponse<String>(HttpStatusCode.Forbidden, "ERROR: Not logged in");
+            }
+
 
             ExecuteMultipleRequest requestWithResults = new ExecuteMultipleRequest()
             {
