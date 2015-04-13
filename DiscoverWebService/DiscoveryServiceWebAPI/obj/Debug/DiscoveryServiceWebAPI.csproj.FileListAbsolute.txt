@@ -167,10 +167,6 @@ C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoverySe
 C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoveryServiceWebAPI\bin\System.Web.WebPages.dll
 C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoveryServiceWebAPI\bin\System.Web.WebPages.Razor.dll
 C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoveryServiceWebAPI\bin\WebGrease.dll
-C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoveryServiceWebAPI\bin\Microsoft.Xrm.Sdk.Deployment.dll
-C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoveryServiceWebAPI\bin\Microsoft.Crm.Sdk.Proxy.xml
-C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoveryServiceWebAPI\bin\Microsoft.Xrm.Client.xml
-C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoveryServiceWebAPI\bin\Microsoft.Xrm.Sdk.xml
 C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoveryServiceWebAPI\bin\EntityFramework.xml
 C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoveryServiceWebAPI\bin\Newtonsoft.Json.xml
 C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoveryServiceWebAPI\bin\System.Web.Helpers.xml
@@ -184,7 +180,6 @@ C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoverySe
 C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoveryServiceWebAPI\bin\Microsoft.Data.Edm.xml
 C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoveryServiceWebAPI\bin\Microsoft.Data.OData.xml
 C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoveryServiceWebAPI\bin\System.Spatial.xml
-C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoveryServiceWebAPI\bin\Microsoft.Xrm.Sdk.Deployment.xml
 C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoveryServiceWebAPI\bin\de\Microsoft.Data.Edm.resources.dll
 C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoveryServiceWebAPI\bin\es\Microsoft.Data.Edm.resources.dll
 C:\Users\Dave\Source\Repos\CDH.DiscoverWebService\DiscoverWebService\DiscoveryServiceWebAPI\bin\fr\Microsoft.Data.Edm.resources.dll
