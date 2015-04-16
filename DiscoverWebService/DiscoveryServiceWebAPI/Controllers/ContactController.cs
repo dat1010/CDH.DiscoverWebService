@@ -52,7 +52,7 @@ namespace DiscoveryServiceWebAPI.Controllers
                 {
                     conectionService.Execute(new WhoAmIRequest());
                     Service = conectionService;
-                    return Request.CreateResponse<String>(HttpStatusCode.Forbidden, "SUCCESS");
+                    return Request.CreateResponse<String>(HttpStatusCode.OK, "SUCCESS");
                 }
                 else
                 {
@@ -124,7 +124,7 @@ namespace DiscoveryServiceWebAPI.Controllers
 
                 if (responseWithResults.IsFaulted)
                 {
-                    return Request.CreateResponse<String>(HttpStatusCode.Forbidden, "ERROR: Fault encountered during upload");
+                    return Request.CreateResponse<String>(HttpStatusCode.InternalServerError, "ERROR: Fault encountered during upload");
                 }
                 return Request.CreateResponse<String>(HttpStatusCode.OK, "SUCCESS");
             }
