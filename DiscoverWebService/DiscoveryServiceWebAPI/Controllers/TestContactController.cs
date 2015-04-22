@@ -1,4 +1,11 @@
-﻿using System;
+﻿/**
+ * 
+ * Test code that bypasses login
+ * 
+ * DO NOT ENABLE IN PRODUCTION
+ * 
+ * 
+ * using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -71,3 +78,4 @@ namespace DiscoveryServiceWebAPI.Controllers
         }
     }
 }
+*/
